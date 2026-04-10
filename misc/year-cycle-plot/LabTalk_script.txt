@@ -1,0 +1,64 @@
+// Final script for all sheets in the active workbook
+// Assumed imported layout before/after processing:
+// 1  Time (hrs)
+// 2  Datetime   (date only, imported as text or date)
+// 3  Time       (time only, imported as text or time)
+// 4  Date-time  (to be created here)
+// 5  Real Year
+// 6  Stage (m)
+// ...
+// 23 Water Surface Width (m)
+
+loop(ii, 1, page.nLayers)
+{
+    page.active = ii;
+
+    // If an old Date-time column already exists at column 4 from a previous run,
+    // remove it so the script can rebuild it cleanly.
+    if (wks.nCols >= 4)
+    {
+        string lname4$ = wks.col4.lname$;
+        if (lname4$ == "Date-time")
+        {
+            delete col(4);
+        }
+    }
+
+    // Convert column 2 from text-like date to true Date
+    wks.col2.setformat(4, 22, yyyy'/'MM'/'dd);
+
+    // Convert column 3 from text-like time to true Time
+    wks.col3.setformat(3, 22, HH':'mm);
+
+    // Insert a new column before current column 4
+    wks.col = 4;
+    wks.insert(tmpDT);
+
+    // Build true date-time as date + time
+    col(4) = col(2) + col(3);
+
+    // Force column 4 to display as a true date-time
+    wks.col4.format = 4;
+    wks.col4.SetFormat(4, 22, yyyy'/'MM'/'dd HH':'mm);
+
+}
+
+doc -uw;
+
+
+
+
+
+
+
+page.xlcolname = 0;   // use numeric column indexing
+
+loop(ii, 1, page.nLayers)
+{
+    page.active = ii;   // activate each sheet
+
+    wks.col4.lname$  = "Date-time";
+
+}
+
+doc -uw;
